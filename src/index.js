@@ -1,7 +1,10 @@
+// File: src/index.js (versi terbaru Minggu 2)
 // Muat konfigurasi (sekaligus memuat .env via config/index.js)
 const config = require('./config');
 const express = require('express');
 const routes = require('./routes');
+const tasksRoutes = require('./routes/tasks.routes');
+const setupSwagger = require('./docs/swagger');
 
 // ─── Inisialisasi Express App ────────────────────────────────
 const app = express();
@@ -24,19 +27,22 @@ app.use((req, res, next) => {
 });
 
 // ─── Routes ─────────────────────────────────────────────────
-// Route health check langsung di root (tanpa prefix /api)
-app.use('/', routes);
+app.use('/', routes);            // /health
+app.use('/api', routes);         // /api/info, /api/echo/:msg
+app.use('/api/v1/tasks', tasksRoutes); // /api/v1/tasks (CRUD)
 
-// Route API dengan prefix /api
-app.use('/api', routes);
+// ─── Swagger UI ─────────────────────────────────────────────
+setupSwagger(app);
 
 // ─── 404 Handler ─────────────────────────────────────────────
 // Tangkap request ke route yang tidak ada
 app.use((req, res) => {
   res.status(404).json({
-    error: 'Not Found',
-    message: `Route ${req.method} ${req.path} tidak ditemukan.`,
-    hint: 'Kunjungi GET /api/info untuk melihat daftar endpoint yang tersedia.',
+    error: {
+      code: 'NOT_FOUND',
+      message: `Route ${req.method} ${req.path} tidak ditemukan.`,
+      hint: 'Kunjungi GET /api/docs untuk dokumentasi API.',
+    },
   });
 });
 
@@ -45,8 +51,10 @@ app.use((req, res) => {
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err.message);
   res.status(500).json({
-    error: 'Internal Server Error',
-    message: config.nodeEnv === 'development' ? err.message : 'Terjadi kesalahan di server.',
+    error: {
+      code: 'INTERNAL_ERROR',
+      message: config.nodeEnv === 'development' ? err.message : 'Terjadi kesalahan di server.',
+    },
   });
 });
 
@@ -56,6 +64,7 @@ app.listen(config.port, () => {
   console.log(` ${config.appName} v${config.version}`);
   console.log(` Environment : ${config.nodeEnv}`);
   console.log(` Server      : http://localhost:${config.port}`);
+  console.log(` Docs        : http://localhost:${config.port}/api/docs`);
   console.log('─'.repeat(50));
 });
 
