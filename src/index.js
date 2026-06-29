@@ -1,9 +1,10 @@
-// File: src/index.js (versi terbaru Minggu 2)
+// File: src/index.js (versi Week 3 - MySQL via Prisma)
 // Muat konfigurasi (sekaligus memuat .env via config/index.js)
 const config = require('./config');
 const express = require('express');
 const routes = require('./routes');
 const tasksRoutes = require('./routes/tasks.routes');
+const usersRoutes = require('./routes/users.routes');
 const setupSwagger = require('./docs/swagger');
 
 // ─── Inisialisasi Express App ────────────────────────────────
@@ -27,15 +28,15 @@ app.use((req, res, next) => {
 });
 
 // ─── Routes ─────────────────────────────────────────────────
-app.use('/', routes);            // /health
-app.use('/api', routes);         // /api/info, /api/echo/:msg
+app.use('/', routes);                  // /health
+app.use('/api', routes);              // /api/info, /api/echo/:msg
 app.use('/api/v1/tasks', tasksRoutes); // /api/v1/tasks (CRUD)
+app.use('/api/v1/users', usersRoutes); // /api/v1/users/:userId/tasks (JOIN)
 
 // ─── Swagger UI ─────────────────────────────────────────────
 setupSwagger(app);
 
 // ─── 404 Handler ─────────────────────────────────────────────
-// Tangkap request ke route yang tidak ada
 app.use((req, res) => {
   res.status(404).json({
     error: {
@@ -47,7 +48,6 @@ app.use((req, res) => {
 });
 
 // ─── Error Handler Global ────────────────────────────────────
-// Middleware error handler memiliki 4 parameter (err, req, res, next)
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err.message);
   res.status(500).json({
@@ -63,6 +63,7 @@ app.listen(config.port, () => {
   console.log('─'.repeat(50));
   console.log(` ${config.appName} v${config.version}`);
   console.log(` Environment : ${config.nodeEnv}`);
+  console.log(` Database    : MySQL via XAMPP`);
   console.log(` Server      : http://localhost:${config.port}`);
   console.log(` Docs        : http://localhost:${config.port}/api/docs`);
   console.log('─'.repeat(50));
