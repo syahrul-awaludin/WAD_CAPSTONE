@@ -5,6 +5,8 @@ const express = require('express');
 const routes = require('./routes');
 const tasksRoutes = require('./routes/tasks.routes');
 const usersRoutes = require('./routes/users.routes');
+const authRoutes = require('./routes/auth.routes');
+const authenticate = require('./middleware/authenticate');
 const setupSwagger = require('./docs/swagger');
 
 // ─── Inisialisasi Express App ────────────────────────────────
@@ -30,6 +32,10 @@ app.use((req, res, next) => {
 // ─── Routes ─────────────────────────────────────────────────
 app.use('/', routes);                  // /health
 app.use('/api', routes);              // /api/info, /api/echo/:msg
+app.use('/api/v1/auth', authRoutes);
+
+// ─── API Routes yang dilindungi ─────────────────────────
+app.use('/api/v1', authenticate);
 app.use('/api/v1/tasks', tasksRoutes); // /api/v1/tasks (CRUD)
 app.use('/api/v1/users', usersRoutes); // /api/v1/users/:userId/tasks (JOIN)
 
@@ -49,7 +55,21 @@ app.use((req, res) => {
 
 // ─── Error Handler Global ────────────────────────────────────
 app.use((err, req, res, next) => {
-  console.error('Unhandled error:', err.message);
+  // Error dengan statusCode dari authService
+  if (err.statusCode) {
+    return res.status(err.statusCode).json({
+      error: { code: err.code || 'AUTH_ERROR', message: err.message },
+    });
+  }
+
+  // Prisma P2002: email duplikat (sudah ada user dengan email tersebut)
+  if (err.code === 'P2002') {
+    return res.status(409).json({
+      error: { code: 'DUPLICATE_RESOURCE', message: 'Data sudah digunakan.' }
+    });
+  }
+
+  console.error('Unhandled error:', err);
   res.status(500).json({
     error: {
       code: 'INTERNAL_ERROR',

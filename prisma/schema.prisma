@@ -18,7 +18,8 @@ model User {
   password  String   @db.VarChar(255)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  tasks     Task[]
+  tasks         Task[]
+  refreshTokens RefreshToken[]
 
   @@map("users")
 }
@@ -70,4 +71,19 @@ enum Priority {
   LOW
   MEDIUM
   HIGH
+}
+
+// ─── Model RefreshToken ───────────────────────────
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique @db.VarChar(512)
+  userId    Int
+  expiresAt DateTime
+  isRevoked Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+  @@map("refresh_tokens")
 }

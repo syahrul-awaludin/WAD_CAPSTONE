@@ -23,7 +23,7 @@ const createTaskSchema = Joi.object({
     .messages({ 'any.only': `priority harus salah satu dari: ${VALID_PRIORITY.join(', ')}.` }),
   dueDate: Joi.date().iso().min('now').optional()
     .messages({ 'date.min': 'dueDate tidak boleh di masa lalu.' }),
-  userId: Joi.number().integer().positive().required(),
+  userId: Joi.number().integer().positive().optional(),
   categoryId: Joi.number().integer().positive().optional(),
 });
 

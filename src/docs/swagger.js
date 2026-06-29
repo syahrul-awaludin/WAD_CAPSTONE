@@ -63,7 +63,15 @@ const options = {
           },
         },
       },
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
+      },
     },
+    security: [{ bearerAuth: [] }],
     tags: [{ name: 'Tasks', description: 'Operasi CRUD untuk resource Task' }],
   },
   // swagger-jsdoc akan membaca JSDoc comment dari file-file ini

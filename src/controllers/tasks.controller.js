@@ -28,7 +28,9 @@ const listTasks = async (req, res, next) => {
 // ─── POST /api/v1/tasks ─────────────────────────────────────
 const createTask = async (req, res, next) => {
   try {
-    const task = await taskRepo.create({ ...req.body, userId: req.body.userId || 1 });
+    // Gunakan userId dari token JWT (diset oleh middleware authenticate)
+    const userId = req.user ? req.user.userId : (req.body.userId || 1);
+    const task = await taskRepo.create({ ...req.body, userId });
     res.status(201).set('Location', `/api/v1/tasks/${task.id}`).json({ data: task });
   } catch (err) { next(err); }
 };
