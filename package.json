@@ -1,0 +1,21 @@
+{
+  "name": "wad-capstone",
+  "version": "1.0.0",
+  "description": "WAD Capstone Project - Unit 1: Dasar dan Arsitektur Web Modern",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
