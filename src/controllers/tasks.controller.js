@@ -5,7 +5,13 @@ const taskRepo = require('../repositories/task.repository');
 const listTasks = async (req, res, next) => {
   try {
     const { status, priority, sort, order, limit, offset } = req.query;
-    const { data, total } = await taskRepo.findMany({ status, priority, sort, order, limit, offset });
+    
+    // User biasa hanya lihat task miliknya; Admin lihat semua
+    const userId = req.user.role === 'ADMIN' ? undefined : req.user.userId;
+    
+    const { data, total } = await taskRepo.findMany({ 
+      userId, status, priority, sort, order, limit, offset 
+    });
 
     const numLimit = Number(limit) || 10;
     const numOffset = Number(offset) || 0;

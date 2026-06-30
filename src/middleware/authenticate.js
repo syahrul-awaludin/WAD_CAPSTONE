@@ -25,6 +25,7 @@ const authenticate = (req, res, next) => {
     req.user = {
       userId: payload.userId,
       email: payload.email,
+      role: payload.role, // ← Tambahkan role
     };
     next();
   } catch (err) {

@@ -89,10 +89,11 @@ const authService = {
       throw err;
     }
 
-    // 4. Buat access token (short-lived: 15 menit)
+    // 4. Generate token
     const accessToken = signAccessToken({
       userId: user.id,
       email: user.email,
+      role: user.role, // ← Tambahkan role di payload
     });
 
     // 5. Buat refresh token (long-lived: 7 hari)

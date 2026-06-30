@@ -12,12 +12,13 @@ datasource db {
 
 // ─── Model User ───────────────────────────────────────────
 model User {
-  id        Int      @id @default(autoincrement())
-  name      String   @db.VarChar(100)
-  email     String   @unique @db.VarChar(255)
-  password  String   @db.VarChar(255)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            Int            @id @default(autoincrement())
+  name          String         @db.VarChar(100)
+  email         String         @unique @db.VarChar(255)
+  password      String         @db.VarChar(255)
+  role          Role           @default(USER)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   tasks         Task[]
   refreshTokens RefreshToken[]
 
@@ -35,7 +36,12 @@ model Category {
   @@map("categories")
 }
 
-// ─── Model Task ───────────────────────────────────────────
+enum Role {
+  USER
+  ADMIN
+}
+
+// ─── Model: Task ──────────────────────────────────────────────
 model Task {
   id          Int       @id @default(autoincrement())
   title       String    @db.VarChar(200)
