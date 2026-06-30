@@ -1,6 +1,7 @@
 // File: prisma/seed.js
 require('dotenv').config();
 const { PrismaClient } = require('@prisma/client');
+const argon2 = require('argon2');
 
 const prisma = new PrismaClient();
 
@@ -8,10 +9,15 @@ async function main() {
   console.log('Mulai seeding database MySQL...');
 
   // Hapus data lama — urutan PENTING karena foreign key constraint!
-  // Hapus task dulu (bergantung pada users & categories)
+  await prisma.refreshToken.deleteMany();
   await prisma.task.deleteMany();
   await prisma.category.deleteMany();
   await prisma.user.deleteMany();
+
+  // Reset auto-increment agar ID mulai dari 1
+  await prisma.$executeRawUnsafe('ALTER TABLE categories AUTO_INCREMENT = 1');
+  await prisma.$executeRawUnsafe('ALTER TABLE users AUTO_INCREMENT = 1');
+  await prisma.$executeRawUnsafe('ALTER TABLE tasks AUTO_INCREMENT = 1');
 
   // ─── Buat Categories ──────────────────────────────────
   const [catBelajar, catKerja, catProyek] = await Promise.all([
@@ -19,16 +25,27 @@ async function main() {
     prisma.category.create({ data: { name: 'Pekerjaan', color: '#F59E0B' } }),
     prisma.category.create({ data: { name: 'Proyek', color: '#10B981' } }),
   ]);
-  console.log(' ✓ 3 kategori dibuat');
+  console.log(' ✓ 3 kategori dibuat (ID: 1, 2, 3)');
 
-  // ─── Buat Users ───────────────────────────────────────
-  // CATATAN: password di-seed sebagai plain text.
-  // Di aplikasi nyata, password WAJIB di-hash (Minggu 6: bcrypt/argon2).
-  const [budi, siti] = await Promise.all([
-    prisma.user.create({ data: { name: 'Budi Santoso', email: 'budi@example.com', password: 'hashed_later' } }),
-    prisma.user.create({ data: { name: 'Siti Rahayu', email: 'siti@example.com', password: 'hashed_later' } }),
+  // ─── Buat Users (password di-hash dengan argon2) ──────
+  const defaultPassword = 'P@ssw0rd!'; // Password default untuk semua seed user
+  const hashedPassword = await argon2.hash(defaultPassword);
+
+  const [budi, siti, admin] = await Promise.all([
+    prisma.user.create({ data: {
+      name: 'Budi Santoso', email: 'budi@example.com',
+      password: hashedPassword, role: 'USER'
+    }}),
+    prisma.user.create({ data: {
+      name: 'Siti Rahayu', email: 'siti@example.com',
+      password: hashedPassword, role: 'USER'
+    }}),
+    prisma.user.create({ data: {
+      name: 'Admin WAD', email: 'admin@example.com',
+      password: hashedPassword, role: 'ADMIN'
+    }}),
   ]);
-  console.log(' ✓ 2 user dibuat');
+  console.log(` ✓ 3 user dibuat (Password: ${defaultPassword})`);
 
   // ─── Buat Tasks ──────────────────────────────────────
   await Promise.all([
