@@ -37,6 +37,20 @@ const createTask = async (req, res, next) => {
     // Gunakan userId dari token JWT (diset oleh middleware authenticate)
     const userId = req.user ? req.user.userId : (req.body.userId || 1);
     const task = await taskRepo.create({ ...req.body, userId });
+    
+    // ── EMIT REAL-TIME EVENT ────────────────────────────
+    const io = req.app.get("io");
+    if (io) {
+      // Kirim ke semua user yang terhubung (room global)
+      io.to("tasks:global").emit("task:created", { task });
+      // Kirim notifikasi personal ke pembuat task
+      io.to(`user:${userId}`).emit("notification", {
+        type: "SUCCESS",
+        title: "Task Berhasil Dibuat",
+        message: `Task "${task.title}" telah ditambahkan.`,
+      });
+    }
+
     res.status(201).set('Location', `/api/v1/tasks/${task.id}`).json({ data: task });
   } catch (err) { next(err); }
 };
@@ -55,6 +69,12 @@ const updateTask = async (req, res, next) => {
   try {
     const task = await taskRepo.update(req.params.id, req.body);
     if (!task) return res.status(404).json({ error: { code: 'NOT_FOUND', message: `Task ID ${req.params.id} tidak ditemukan.` } });
+    
+    const io = req.app.get("io");
+    if (io) {
+      io.to("tasks:global").emit("task:updated", { task });
+    }
+
     res.status(200).json({ data: task });
   } catch (err) { next(err); }
 };
@@ -64,6 +84,12 @@ const deleteTask = async (req, res, next) => {
   try {
     const ok = await taskRepo.remove(req.params.id);
     if (!ok) return res.status(404).json({ error: { code: 'NOT_FOUND', message: `Task ID ${req.params.id} tidak ditemukan.` } });
+    
+    const io = req.app.get("io");
+    if (io) {
+      io.to("tasks:global").emit("task:deleted", { taskId: parseInt(req.params.id) });
+    }
+
     res.status(204).send();
   } catch (err) { next(err); }
 };

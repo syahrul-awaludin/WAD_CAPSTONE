@@ -18,6 +18,8 @@ const validate = (schema, source = 'body') => {
         field: d.path.join('.'),
         message: d.message,
       }));
+      console.error('JOI VALIDATION ERROR:', JSON.stringify(details, null, 2));
+      console.error('PAYLOAD:', req[source]);
       return res.status(400).json({
         error: {
           code: 'VALIDATION_ERROR',

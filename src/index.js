@@ -2,6 +2,8 @@
 // Muat konfigurasi (sekaligus memuat .env via config/index.js)
 const config = require('./config');
 const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
 const helmet = require('helmet');
 const cors = require('cors');
 const corsOptions = require('./config/cors');
@@ -17,6 +19,22 @@ const setupSwagger = require('./docs/swagger');
 
 // ─── Inisialisasi Express App ────────────────────────────────
 const app = express();
+const server = http.createServer(app);
+
+// ── SOCKET.IO SERVER ──────────────────────────────────────
+const io = new Server(server, {
+  cors: {
+    origin: corsOptions.origin,
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+  pingTimeout: 60000,
+  pingInterval: 25000,
+});
+
+app.set("io", io);
+
+require("./socket")(io);
 
 // ─── 1. Security Headers (Helmet) ──────────────────────
 // Harus dipasang PALING AWAL sebelum middleware lain
@@ -109,12 +127,13 @@ app.use((err, req, res, next) => {
 });
 
 // ─── Start Server ────────────────────────────────────────────
-app.listen(config.port, () => {
+server.listen(config.port, () => {
   console.log('─'.repeat(50));
   console.log(` ${config.appName} v${config.version}`);
   console.log(` Environment : ${config.nodeEnv}`);
-  console.log(` Database    : MySQL via XAMPP`);
+  console.log(` Database    : MySQL via Prisma`);
   console.log(` Server      : http://localhost:${config.port}`);
+  console.log(` Socket.IO   : siap`);
   console.log(` Docs        : http://localhost:${config.port}/api/docs`);
   console.log('─'.repeat(50));
 });

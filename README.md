@@ -20,6 +20,7 @@ RESTful API untuk Capstone Project Web Advanced Development. API ini merupakan s
 - **ORM**: [Prisma](https://www.prisma.io/)
 - **Keamanan**: `argon2` (Password Hashing), `jsonwebtoken`, `helmet`, `cors`, `express-rate-limit`, `xss`
 - **Validasi**: `joi`
+- **Real-Time**: `socket.io`
 - **Dokumentasi**: `swagger-jsdoc`, `swagger-ui-express`
 
 ---
@@ -134,3 +135,26 @@ Aplikasi ini telah diperkuat menggunakan beberapa standar keamanan:
   - *Auth/Sensitif*: Maksimal 5 kegagalan login / 15 menit per IP untuk mencegah *brute-force attack*.
 - **XSS Sanitization**: Middleware yang menggunakan library `xss` untuk membersihkan *request body* dari injeksi script berbahaya sebelum disimpan ke database.
 - **Argon2**: Standar *hashing* modern untuk mengamankan kata sandi di database.
+
+---
+
+## 📡 Real-Time Updates (Socket.IO)
+
+Aplikasi ini menggunakan Socket.IO untuk menyediakan pembaruan secara *real-time*.
+
+### Koneksi & Autentikasi
+Klien harus menyertakan token JWT (Access Token) pada saat melakukan koneksi (handshake):
+```javascript
+const socket = io("http://localhost:3000", {
+  auth: { token: "YOUR_JWT_TOKEN" }
+});
+```
+
+### Events yang Tersedia
+| Event Name | Room Target | Deskripsi | Payload |
+|---|---|---|---|
+| `users:online` | *Global* | Broadcast jumlah klien yang sedang aktif setiap ada yang connect/disconnect. | `{ count: number }` |
+| `task:created` | `tasks:global` | Ter-trigger setiap ada task baru yang dibuat. | `{ task: Object }` |
+| `task:updated` | `tasks:global` | Ter-trigger saat task diperbarui. | `{ task: Object }` |
+| `task:deleted` | `tasks:global` | Ter-trigger saat task dihapus. | `{ taskId: number }` |
+| `notification` | `user:{userId}` | Notifikasi personal saat pengguna berhasil membuat task. | `{ type, title, message }` |
