@@ -46,10 +46,18 @@ const logout = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
+const userRepo = require('../repositories/user.repository');
+
 // GET /auth/me — informasi user yang sedang login
-const me = (req, res) => {
-  // req.user diisi oleh authenticate middleware
-  res.status(200).json({ data: req.user });
+const me = async (req, res, next) => {
+  try {
+    // req.user diisi oleh authenticate middleware (berisi userId dari JWT)
+    const user = await userRepo.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({ error: { message: 'User tidak ditemukan' } });
+    }
+    res.status(200).json({ data: user });
+  } catch (err) { next(err); }
 };
 
 module.exports = { register, login, refresh, logout, me };

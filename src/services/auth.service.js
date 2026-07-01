@@ -54,7 +54,7 @@ const authService = {
     // 3. Simpan user baru ke database
     const user = await prisma.user.create({
       data: { name, email, password: hashedPassword },
-      select: { id: true, name: true, email: true, createdAt: true },
+      select: { id: true, name: true, email: true, role: true, createdAt: true },
     });
 
     return user;
@@ -107,7 +107,7 @@ const authService = {
     });
 
     return {
-      user: { id: user.id, name: user.name, email: user.email },
+      user: { id: user.id, name: user.name, email: user.email, role: user.role, createdAt: user.createdAt },
       accessToken,
       refreshToken,
     };

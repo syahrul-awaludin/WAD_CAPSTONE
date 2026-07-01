@@ -1,6 +1,18 @@
 // File: src/repositories/task.repository.js
 const prisma = require('../config/prisma');
 
+// ─── Helper: Normalisasi enum dari UPPERCASE (Prisma) ke lowercase (API) ───
+// Prisma/MySQL menyimpan enum sebagai UPPERCASE (TODO, IN_PROGRESS, DONE, LOW, MEDIUM, HIGH)
+// Tapi API kita menggunakan lowercase (todo, in_progress, done, low, medium, high)
+function normalizeTask(task) {
+  if (!task) return task;
+  return {
+    ...task,
+    status: task.status ? task.status.toLowerCase() : task.status,
+    priority: task.priority ? task.priority.toLowerCase() : task.priority,
+  };
+}
+
 const taskRepository = {
   // ─── List tasks dengan filter, sort, pagination ────────
   async findMany({ userId, status, priority, sort = 'createdAt', order = 'desc', limit = 10, offset = 0 } = {}) {
@@ -24,23 +36,24 @@ const taskRepository = {
       prisma.task.count({ where }),
     ]);
 
-    return { data, total };
+    return { data: data.map(normalizeTask), total };
   },
 
   // ─── Cari satu task by ID ───────────────────────────────
   async findById(id) {
-    return prisma.task.findUnique({
+    const task = await prisma.task.findUnique({
       where: { id: Number(id) },
       include: {
         user: { select: { id: true, name: true, email: true } },
         category: { select: { id: true, name: true, color: true } },
       },
     });
+    return normalizeTask(task);
   },
 
   // ─── Buat task baru ─────────────────────────────────────
   async create(data) {
-    return prisma.task.create({
+    const task = await prisma.task.create({
       data: {
         title: data.title,
         description: data.description || null,
@@ -55,12 +68,13 @@ const taskRepository = {
         category: { select: { id: true, name: true, color: true } },
       },
     });
+    return normalizeTask(task);
   },
 
   // ─── Update sebagian field (PATCH) ──────────────────────
   async update(id, data) {
     try {
-      return await prisma.task.update({
+      const task = await prisma.task.update({
         where: { id: Number(id) },
         data: {
           ...data,
@@ -73,6 +87,7 @@ const taskRepository = {
           category: { select: { id: true, name: true, color: true } },
         },
       });
+      return normalizeTask(task);
     } catch (e) {
       if (e.code === 'P2025') return null; // Record tidak ditemukan
       throw e;
@@ -92,7 +107,7 @@ const taskRepository = {
 
   // ─── JOIN: semua task milik user tertentu ────────────────
   async findByUser(userId) {
-    return prisma.user.findUnique({
+    const result = await prisma.user.findUnique({
       where: { id: Number(userId) },
       include: {
         tasks: {
@@ -101,6 +116,10 @@ const taskRepository = {
         },
       },
     });
+    if (result && result.tasks) {
+      result.tasks = result.tasks.map(normalizeTask);
+    }
+    return result;
   },
 };
 
