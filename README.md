@@ -158,3 +158,20 @@ const socket = io("http://localhost:3000", {
 | `task:updated` | `tasks:global` | Ter-trigger saat task diperbarui. | `{ task: Object }` |
 | `task:deleted` | `tasks:global` | Ter-trigger saat task dihapus. | `{ taskId: number }` |
 | `notification` | `user:{userId}` | Notifikasi personal saat pengguna berhasil membuat task. | `{ type, title, message }` |
+
+---
+
+## ☁️ Deployment & CI/CD
+
+Proyek ini telah dikonfigurasi untuk ter-deploy secara otomatis ke VPS menggunakan **GitHub Actions**.
+
+### Arsitektur Deployment
+- **Cloud Provider**: Biznet Gio NEO Lite (Ubuntu 22.04)
+- **Proses Manager**: PM2
+- **Port Publik**: Aplikasi di-serve melalui Nginx Reverse Proxy (Port 80) meneruskan trafik ke backend di port `3000`.
+
+### Alur CI/CD
+1. Setiap kali kode baru di-push ke branch `main`, workflow `.github/workflows/deploy.yml` akan berjalan.
+2. GitHub Actions masuk ke VPS secara otomatis menggunakan SSH Key (Base64 Secret).
+3. Mengeksekusi perintah: `git pull`, `npm install --omit=dev`, dan `pm2 restart backend`.
+4. API langsung ter-update di server tanpa perlu login manual ke VPS!
