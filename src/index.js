@@ -38,7 +38,14 @@ require("./socket")(io);
 
 // ─── 1. Security Headers (Helmet) ──────────────────────
 // Harus dipasang PALING AWAL sebelum middleware lain
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    useDefaults: true,
+    directives: {
+      "upgrade-insecure-requests": null,
+    },
+  },
+}));
 
 // ─── 2. CORS ─────────────────────────────────────────
 app.use(cors(corsOptions));
