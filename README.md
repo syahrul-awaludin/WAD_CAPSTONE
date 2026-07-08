@@ -92,11 +92,13 @@ npm run db:seed
 **Informasi Seed Data:**
 Setelah menjalankan `db:seed`, database akan memiliki 3 user default:
 
-| Email | Password | Role |
-|---|---|---|
-| `budi@example.com` | `P@ssw0rd!` | USER |
-| `siti@example.com` | `P@ssw0rd!` | USER |
-| `admin@example.com` | `P@ssw0rd!` | ADMIN |
+| Email | Role |
+|---|---|
+| `budi@example.com` | USER |
+| `siti@example.com` | USER |
+| `admin@example.com` | ADMIN |
+
+> **Catatan:** Password akun seed bersifat rahasia. Hubungi administrator untuk mendapatkan akses.
 
 ### 5. Menjalankan Server
 
@@ -228,7 +230,7 @@ Internet (HTTPS Port 443)
 | **SSL/TLS** | Let's Encrypt (via Certbot) - Auto-renew |
 | **Domain** | `https://syahrulawaludin.my.id` |
 | **Proses Manager** | PM2 |
-| **Port Backend** | `3000` (internal) |
+| **Port Backend** | `3000` (internal, diproxy oleh Nginx) |
 
 ### Konfigurasi Nginx (`/etc/nginx/sites-available/wad`)
 ```nginx
@@ -275,6 +277,6 @@ server {
 | Secret | Keterangan |
 |---|---|
 | `SSH_PRIVATE_KEY` | Private key SSH (di-encode Base64) |
-| `VPS_HOST` | Alamat IP VPS (`103.93.135.88`) |
-| `VPS_USER` | Username VPS (`syahrulaw`) |
+| `VPS_HOST` | Alamat IP publik VPS |
+| `VPS_USER` | Username SSH VPS |
 | `VPS_PORT` | Port SSH (default: `22`) |
