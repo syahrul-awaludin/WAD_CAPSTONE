@@ -11,7 +11,10 @@ const options = {
       version: config.version,
       description: 'REST API untuk capstone project Web Advanced Development.',
     },
-    servers: [{ url: `http://localhost:${config.port}/api/v1`, description: 'Local Dev' }],
+    servers: [
+      { url: 'https://syahrulawaludin.my.id/api/v1', description: 'Production Server' },
+      { url: `http://localhost:${config.port}/api/v1`, description: 'Local Dev' }
+    ],
     components: {
       schemas: {
         CreateTask: {

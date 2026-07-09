@@ -58,7 +58,7 @@ cp .env.example .env
 
 Edit file `.env` dengan nilai yang sesuai:
 ```env
-PORT=3000
+PORT=3005
 NODE_ENV=development
 
 # MySQL Connection String
@@ -110,7 +110,7 @@ npm run dev
 npm start
 ```
 
-Server akan berjalan di `http://localhost:3000`.
+Server akan berjalan di `http://localhost:3005`.
 
 ---
 
@@ -118,7 +118,7 @@ Server akan berjalan di `http://localhost:3000`.
 
 Setelah server berjalan, Anda dapat melihat dan mencoba seluruh endpoint API melalui antarmuka Swagger UI di:
 
-- **Lokal:** [http://localhost:3000/api/docs](http://localhost:3000/api/docs)
+- **Lokal:** [http://localhost:3005/api/docs](http://localhost:3005/api/docs)
 - **Production:** [https://syahrulawaludin.my.id/api/docs](https://syahrulawaludin.my.id/api/docs)
 
 ---
@@ -218,7 +218,7 @@ Internet (HTTPS Port 443)
        │                 │
        ▼                 ▼
   /api/, /socket.io/    /
-  Backend (PM2:3000)    Frontend (PM2:3001)
+  Backend (PM2:3005)    Frontend (PM2:3001)
 ```
 
 ### Detail Infrastruktur
@@ -230,7 +230,7 @@ Internet (HTTPS Port 443)
 | **SSL/TLS** | Let's Encrypt (via Certbot) - Auto-renew |
 | **Domain** | `https://syahrulawaludin.my.id` |
 | **Proses Manager** | PM2 |
-| **Port Backend** | `3000` (internal, diproxy oleh Nginx) |
+| **Port Backend** | `3005` (internal, diproxy oleh Nginx) |
 
 ### Konfigurasi Nginx (`/etc/nginx/sites-available/wad`)
 ```nginx
@@ -240,7 +240,7 @@ server {
 
     # Socket.IO → Backend (harus di atas /api/)
     location /socket.io/ {
-        proxy_pass http://localhost:3000;
+        proxy_pass http://localhost:3005;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
@@ -249,9 +249,9 @@ server {
         proxy_cache_bypass $http_upgrade;
     }
 
-    # REST API → Backend (port 3000)
+    # REST API → Backend (port 3005)
     location /api/ {
-        proxy_pass http://localhost:3000;
+        proxy_pass http://localhost:3005;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
